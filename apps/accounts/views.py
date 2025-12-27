@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from rest_framework import status, generics, permissions
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -32,10 +31,8 @@ class RegisterView(generics.CreateAPIView):
             'user': UserProfileSerializer(user).data,
             'refresh': str(refresh),
             'access': str(refresh.access_token),
-            'message': 'User registered successfully'
-
+            'message': 'User regirstered successfully'
         }, status=status.HTTP_201_CREATED)
-
 
 
 class LoginView(generics.GenericAPIView):
@@ -51,14 +48,12 @@ class LoginView(generics.GenericAPIView):
         login(request, user)
         refresh = RefreshToken.for_user(user)
 
-        Response({
+        return Response({
             'user': UserProfileSerializer(user).data,
             'refresh': str(refresh),
             'access': str(refresh.access_token),
             'message': 'User login successfully'
-
-        }, status=status.HTTP_OK)
-
+        }, status=status.HTTP_200_OK)
 
 
 class ProfileView(generics.RetrieveUpdateAPIView):
@@ -75,7 +70,6 @@ class ProfileView(generics.RetrieveUpdateAPIView):
         return UserProfileSerializer
 
 
-
 class ChangePasswordView(generics.UpdateAPIView):
     """Смена пароля"""
     serializer_class = ChangePasswordSerializer
@@ -90,27 +84,23 @@ class ChangePasswordView(generics.UpdateAPIView):
         serializer.save()
 
         return Response({
-            'message': 'Password updated successfully'
+            'message': 'Password changed successfully'
         }, status=status.HTTP_200_OK)
-
 
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
 def logout_view(request):
     """Выход пользователя"""
-
     try:
         refresh_token = request.data.get('refresh_token')
         if refresh_token:
             token = RefreshToken(refresh_token)
             token.blacklist()
         return Response({
-            'message': 'Logout successful',
-
-        }, status=status.HTTP_200_ok)
+            'message': 'Logout successful'
+        }, status=status.HTTP_200_OK)
     except Exception:
         return Response({
-            'error': 'invalid Token'
+            'error': 'Invalid token'
         }, status=status.HTTP_400_BAD_REQUEST)
-

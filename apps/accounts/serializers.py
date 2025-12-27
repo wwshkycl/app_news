@@ -5,7 +5,7 @@ from .models import User
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
-    """регистрация пользователя"""
+    """Сериализатор для регистрации пользователя"""
     password = serializers.CharField(
         write_only=True,
         validators=[validate_password]
@@ -32,13 +32,12 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return user
 
 
-
 class UserLoginSerializer(serializers.Serializer):
-    """вход юзера"""
-    email = serializers.EmailFeld()
+    """Сериализатор для входа пользователя"""
+    email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
 
-    def validator(self, attrs):
+    def validate(self, attrs):
         email = attrs.get('email')
         password = attrs.get('password')
 
@@ -48,20 +47,19 @@ class UserLoginSerializer(serializers.Serializer):
                 username=email,
                 password=password
             )
-            if user is None:
+            if not user:
                 raise serializers.ValidationError(
-                    'User not found'
+                    'User not found.'
                 )
             if not user.is_active:
                 raise serializers.ValidationError(
-                    'User account is disabled'
+                    'User account is disabled.'
                 )
             attrs['user'] = user
             return attrs
-
         else:
             raise serializers.ValidationError(
-                'mast include "email" and "password".'
+                'Must include "email" and "password".'
             )
 
 
@@ -81,10 +79,20 @@ class UserProfileSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'created_at', 'updated_at')
 
     def get_posts_count(self, obj):
-        return obj.posts.count()
+        """Безопасное получение количества постов"""
+        try:
+            return obj.posts.count()
+        except AttributeError:
+            # Если атрибут posts не существует, возвращаем 0
+            return 0
 
     def get_comments_count(self, obj):
-        return obj.comments.count()
+        """Безопасное получение количества комментариев"""
+        try:
+            return obj.comments.count()
+        except AttributeError:
+            # Если атрибут comments не существует, возвращаем 0
+            return 0
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):
@@ -112,17 +120,16 @@ class ChangePasswordSerializer(serializers.Serializer):
     )
     new_password_confirm = serializers.CharField(required=True)
 
-
     def validate_old_password(self, value):
         user = self.context['request'].user
         if not user.check_password(value):
-            raise serializers.ValidationError('error password is incorrect')
+            raise serializers.ValidationError('Old password is incorrect.')
         return value
 
     def validate(self, attrs):
         if attrs['new_password'] != attrs['new_password_confirm']:
             raise serializers.ValidationError(
-                {'new_password': 'Password didnt match'}
+                {'new_password': 'Pasword fields didnt match.'}
             )
         return attrs
 
