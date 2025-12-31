@@ -185,6 +185,10 @@ SIMPLE_JWT = {
 
 
 # Security Settings
+
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
@@ -242,6 +246,11 @@ os.makedirs(BASE_DIR / 'logs', exist_ok=True)
 # URL фронтенда для редиректов
 FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:5173')
 
+# Stripe настройки
+STRIPE_PUBLISHABLE_KEY = config('STRIPE_PUBLISHABLE_KEY', default='')
+STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY', default='')
+STRIPE_WEBHOOK_SECRET = config('STRIPE_WEBHOOK_SECRET', default='')
+
 # Email настройки (для уведомлений)
 EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
 EMAIL_HOST = config('EMAIL_HOST', default='localhost')
@@ -269,16 +278,16 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'apps.subscribe.tasks.send_subscription_expiry_reminder',
         'schedule': 86400.0,  # Каждый день
     },
-    # 'cleanup-old-payments': {
-    #     'task': 'apps.payment.tasks.cleanup_old_payments',
-    #     'schedule': 604800.0,  # Каждую неделю
-    # },
-    # 'cleanup-old-webhook-events': {
-    #     'task': 'apps.payment.tasks.cleanup_old_webhook_events',
-    #     'schedule': 86400.0,  # Каждый день
-    # },
-    # 'retry-failed-webhook-events': {
-    #     'task': 'apps.payment.tasks.retry_failed_webhook_events',
-    #     'schedule': 3600.0,  # Каждый час
-    # },
+    'cleanup-old-payments': {
+        'task': 'apps.payment.tasks.cleanup_old_payments',
+        'schedule': 604800.0,  # Каждую неделю
+    },
+    'cleanup-old-webhook-events': {
+        'task': 'apps.payment.tasks.cleanup_old_webhook_events',
+        'schedule': 86400.0,  # Каждый день
+    },
+    'retry-failed-webhook-events': {
+        'task': 'apps.payment.tasks.retry_failed_webhook_events',
+        'schedule': 3600.0,  # Каждый час
+    },
 }
