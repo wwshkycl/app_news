@@ -125,14 +125,24 @@ USE_I18N = True
 
 USE_TZ = True
 
+STATUS_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Static files
-STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / config('STATIC_ROOT', default='staticfiles')
+# Additional locations of static files (только если директория существует)
+STATICFILES_DIRS = []
 
-# Media files
+# Проверяем, существует ли директория static в проекте
+if (BASE_DIR / 'static').exists():
+    STATICFILES_DIRS.append(BASE_DIR / 'static')
+
+# Static files finders
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
+
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / config('MEDIA_ROOT', default='media')
+MEDIA_ROOT = BASE_DIR / 'media'
 
 AUTH_USER_MODEL = 'accounts.User'
 
